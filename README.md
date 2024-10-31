@@ -6,7 +6,7 @@ the json data will be returned in the text box.
 After that by pressing the generate button a chart will
 visualise the data in a chart.
 
-Due to some restorations in Cross-Origin Resource Sharing (CORS)
+Due to some restrictions in Cross-Origin Resource Sharing (CORS)
 I was unable to directly generate a graph from the retrieved API data
 and I've had to utilise the Cors-anywhere demo that's provided by 
 https://github.com/Rob--W/cors-anywhere
