@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Data and Display Stick Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            width: 793px; /* A4 width in pixels */
+            height: 1122px; /* A4 height in pixels */
+            margin: 0 auto; /* Centering the content */
+            font-family: Arial, sans-serif; /* Font style */
+            padding: 20px; /* Padding around the content */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional shadow effect */
+            background-color: #f9f9f9; /* Light background color */
+        }
+        h2, h3 {
+            text-align: center; /* Center align headings */
+        }
+    </style>
+</head>
+<body>
+    <h2>Fetch Data from URL</h2>
+    
+    <label for="user-input">Enter 3 words separated by hyphens (e.g., "hot-sexy-mama"):</label>
+    <input type="text" id="user-input" placeholder="example: three-word-name" required pattern="^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z]+$">
+    <button onclick="fetchData()">Go</button>
+    
+    <h3>JSON Data:</h3>
+    <textarea id="json-input" placeholder="JSON data will appear here..." rows="10" style="width: 100%;"></textarea>
+    <button onclick="generateChart()">Generate Chart</button>
+    
+    <div style="margin-top: 20px;">
+        <canvas id="myChart" width="250" height="150"></canvas>
+    </div>
+
+    <script>
+        async function fetchData() {
+            const userInput = document.getElementById('user-input').value;
+            
+            // Validate the input pattern
+            const pattern = /^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z]+$/;
+            if (!pattern.test(userInput)) {
+                alert('Please enter exactly 3 words separated by hyphens.');
+                return;
+            }
+
+            // Using cors-anywhere proxy to bypass CORS restrictions
+            const url = `https://cors-anywhere.herokuapp.com/https://www.hivemapper.com/api/explorer/user/${userInput}`;
+            
+            try {
+                const response = await fetch(url);
+                
+                // Check if the request was successful
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                
+                const jsonData = await response.json();
+                
+                // Insert the JSON data into the textarea
+                document.getElementById('json-input').value = JSON.stringify(jsonData, null, 2);
+            } catch (error) {
+                alert('Failed to fetch data: ' + error.message);
+            }
+        }
+
+        function generateChart() {
+            let jsonData;
+            try {
+                jsonData = JSON.parse(document.getElementById('json-input').value);
+            } catch (error) {
+                alert('Invalid JSON. Please check your input and try again.');
+                return;
+            }
+
+            if (!jsonData.stats || !jsonData.stats.kmUploadedByDay) {
+                alert('JSON data does not contain the expected kmUploadedByDay field.');
+                return;
+            }
+
+            const kmData = jsonData.stats.kmUploadedByDay;
+            const labels = Object.keys(kmData);
+            const values = Object.values(kmData);
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Kilometers Uploaded by Day',
+                        data: values,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Kilometers'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
