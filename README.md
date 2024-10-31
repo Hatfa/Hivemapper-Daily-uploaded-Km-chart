@@ -10,6 +10,7 @@ Due to some restrictions in Cross-Origin Resource Sharing (CORS)
 I was unable to directly generate a graph from the retrieved API data
 and I've had to utilise the Cors-anywhere demo that's provided by 
 https://github.com/Rob--W/cors-anywhere
+
 To avoid spamming and missuse, a demo version is available for public use
 which is limited to 50 queries per hour and the user is required to request access 
 by following the instructions in the link below:
