@@ -17,4 +17,4 @@ by following the instructions in the link below:
 
 https://cors-anywhere.herokuapp.com/corsdemo
 
-the html wile will not function without requesting access.
+the html file will not function without requesting access.
