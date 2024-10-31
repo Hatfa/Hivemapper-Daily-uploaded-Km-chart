@@ -1,5 +1,5 @@
-Using the api provided by Hivemappe, 
-you can generatt the daily uploaded kms chart
+Using the api provided by Hivemapper, 
+you can generate the daily uploaded kms chart
 for any user by providing the three word username 
 then if there's data available, 
 the json data will be returned in the text box. 
