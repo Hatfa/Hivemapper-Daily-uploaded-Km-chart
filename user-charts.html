@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Data and Display Charts</title>
+<script>
+    function showCharts(selected) {
+        const userChartsSection = document.getElementById('user-charts');
+        const fleetChartsSection = document.getElementById('fleet-charts');
+        const otherSection = document.getElementById('other');
+
+        if (selected === 'userCharts') {
+            userChartsSection.style.display = 'block';
+            fleetChartsSection.style.display = 'none';
+            otherSection.style.display = 'none';
+        } else if (selected === 'fleetCharts') {
+            userChartsSection.style.display = 'none';
+            fleetChartsSection.style.display = 'block';
+            otherSection.style.display = 'none';
+        } else {
+            userChartsSection.style.display = 'none';
+            fleetChartsSection.style.display = 'none';
+            otherSection.style.display = 'none';
+        }
+    }
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Flexbox layout for user charts */
+        .user-charts {
+            display: flex;
+            flex-direction: column; /* Align sections vertically */
+            margin-bottom: 20px;
+            font-size: 35px;
+        }
+
+        /* Individual user chart section styling */
+        .chart-section {
+            display: flex; /* Display charts next to each other */
+            flex-direction: column; /* Align charts vertically */
+            margin-bottom: 20px; /* Space between user sections */
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: transparent; /* Transparent background */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Individual chart container */
+        .chart-container {
+            display: flex; /* Display charts side by side */
+            justify-content: space-between; /* Space out the charts */
+            margin-bottom: 10px; /* Space between the name and charts */
+            font-size: 16px;
+        }
+
+        /* Input and button styling */
+        textarea {
+            width: calc(100% - 120px);
+            height: 100px;
+            margin-right: 10px;
+            resize: none;
+        }
+
+        body {
+            width: 793px;
+            height: auto;
+            margin: 0 auto;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #8f909c;
+        }
+        h2, h3 {
+            text-align: center;
+        }
+
+        /* Styling the toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-top: 15px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* JSON data section, hidden by default */
+        #json-section {
+            display: none;
+            margin-top: 10px;
+        }
+
+        /* 2x2 grid styling */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .grid-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: transparent; /* Transparent background */
+        }
+
+        /* Chart styling */
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+       .button-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF; /* Blue background */
+            color: white; /* White text */
+            transition: background-color 0.3s;
+        }
+
+        .chart-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+<button onclick="window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank')">
+    Click here first to gain access to the CORS demo
+</button>
+<br>
+<br>
+
+  <!-- Button menu for chart selection -->
+    <div class="button-container">
+        <h2>Select Fetch Type:</h2>
+        <button class="chart-button" onclick="showCharts('userCharts')">Single User</button>
+        <button class="chart-button" onclick="showCharts('fleetCharts')">Multiple Users (for Fleets)</button>
+        <button class="chart-button" onclick="showCharts('other')">Other (Wip)</button>
+    </div>
+
+<!-- Sections for different chart types -->
+<div id="user-charts" style="display: none;">
+    <!-- Existing user charts code goes here -->
+
+
+<h2>Fetch Data for Single User</h2>
+<label for="user-input1">Enter 3 words separated by hyphens (e.g., "great-white-shark"):</label>
+<input type="text" id="user-input1" placeholder="example: three-word-name" required pattern="^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z]+$">
+<button class="chart-button" onclick="fetchData1()">Go</button>
+
+<!-- Toggle Switch to Show/Hide JSON Data -->
+<div>
+    <label class="toggle-switch">
+        <input type="checkbox" id="toggle-json" onclick="toggleJsonSection()">
+        <span class="slider"></span>
+    </label>
+    <label for="toggle-json">Show/Hide JSON Data</label>
+</div>
+
+<!-- JSON Data section, hidden by default -->
+<div id="json-section">
+    <h3>JSON Data:</h3>
+    <textarea id="json-input" placeholder="JSON data will appear here..." rows="50" style="width: 100%; height: 25%;"></textarea>
+</div>
+
+<!-- 2x2 Grid Container for Charts -->
+<div class="grid-container">
+    <div class="grid-item">
+        <canvas id="barChart"></canvas>
+    </div>
+    <div class="grid-item">
+        <canvas id="tokensLineChart"></canvas>
+    </div>
+    <div class="grid-item">
+        <canvas id="mountReviewsLineChart"></canvas>
+    </div>
+    <div class="grid-item">
+        <canvas id="totalL12ByWeekLineChart"></canvas>
+</div>
+</div>
+
+<script>
+    let barChart, tokensLineChart, mountReviewsLineChart, totalL12ByWeekLineChart;
+
+    function toggleJsonSection() {
+        const jsonSection = document.getElementById('json-section');
+        jsonSection.style.display = document.getElementById('toggle-json').checked ? 'block' : 'none';
+    }
+
+    async function fetchData1() {
+        const userInput = document.getElementById('user-input1').value;
+        const pattern = /^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z]+$/;
+
+        if (!pattern.test(userInput)) {
+            alert('Please enter exactly 3 words separated by hyphens.');
+            return;
+        }
+
+        const url = `https://cors-anywhere.herokuapp.com/https://www.hivemapper.com/api/explorer/user/${userInput}`;
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const jsonData = await response.json();
+            document.getElementById('json-input').value = JSON.stringify(jsonData, null, 2);
+
+            generateBarChart(jsonData);
+            generateLineChartTokensByWeek(jsonData);
+            generateLineChartMountReviews(jsonData);
+
+generateLineCharttotalL12ByWeek(jsonData);
+
+        } catch (error) {
+            alert('Failed to fetch data: ' + error.message);
+        }
+    }
+
+    function generateBarChart(data) {
+        const labels = Object.keys(data.stats.kmUploadedByDay || {});
+        const values = Object.values(data.stats.kmUploadedByDay || {});
+
+        if (barChart) barChart.destroy();
+
+        const ctx = document.getElementById('barChart').getContext('2d');
+        barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Kilometers Uploaded by Day',
+                    data: values,
+                    backgroundColor: 'rgba(15, 31, 209, 0.8)',
+                    borderColor: 'rgba(1, 10, 105, 1)',
+                    borderWidth: 1
+                }]
+            },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Kilometers',
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+        });
+    }
+
+    function generateLineChartTokensByWeek(data) {
+        const labels = Object.keys(data.stats.tokensByWeek || {});
+        const values = Object.values(data.stats.tokensByWeek || {});
+
+        if (tokensLineChart) tokensLineChart.destroy();
+
+        const ctx = document.getElementById('tokensLineChart').getContext('2d');
+        tokensLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Tokens by Week',
+                    data: values,
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderColor: 'darkblue',
+                    pointBackgroundColor: 'darkblue',
+                    pointRadius: 4
+                }]
+            },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Honey',
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+    }
+
+    function generateLineChartMountReviews(data) {
+        const labels = Object.keys(data.stats.mountReviews || {});
+        const values = Object.values(data.stats.mountReviews || {});
+
+        if (mountReviewsLineChart) mountReviewsLineChart.destroy();
+
+        const ctx = document.getElementById('mountReviewsLineChart').getContext('2d');
+        mountReviewsLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Mount Reviews',
+                    data: values,
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    borderColor: 'mustard',
+                    pointBackgroundColor: '#b8860b',
+                    pointRadius: 4
+                }]
+            },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 1,
+                            suggestedmax: 4,
+                            title: {
+                                display: true,
+                                text: 'Score',
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+        });
+    }
+ function generateLineCharttotalL12ByWeek(data) {
+        const labels = Object.keys(data.stats.totalL12ByWeek || {});
+        const values = Object.values(data.stats.totalL12ByWeek || {});
+
+        if (totalL12ByWeekLineChart) totalL12ByWeekLineChart.destroy();
+
+
+        const ctx = document.getElementById('totalL12ByWeekLineChart').getContext('2d');
+        totalL12ByWeekLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Total per Week',
+                    data: values,
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderColor: 'darkblue',
+                    pointBackgroundColor: 'darkblue',
+                    pointRadius: 4
+                }]
+            },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Km',
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                color: '#000',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+    }
+
+</script>
+</div>
+
+<div id="fleet-charts" style="display: none;">
+    
+<h2>Fetch Data for Multiple Users</h2>
+<label for="user-input2">Enter 3 words separated by hyphens (one per line, e.g., "great-white-shark"):</label>
+<textarea id="user-input2" placeholder="example: great-white-shark&#10;another-name-here"></textarea><br>
+<button class="chart-button" onclick="addUsers()">Add Users</button><br>
+<br>
+
+<!-- Section to display charts for each user -->
+<div id="users-section" class="user-charts"></div>
+
+<script>
+    const usersData = {}; // Object to store user data and charts
+
+    function addUsers() {
+        const userInput = document.getElementById('user-input2').value;
+        const userNames = userInput.split('\n').map(name => name.trim()).filter(name => name); // Split by line and trim whitespace
+
+        userNames.forEach(user => {
+            const pattern = /^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z]+$/;
+            if (!pattern.test(user)) {
+                alert(`Invalid input: ${user}. Please enter names in the format "word-word-word".`);
+                return;
+            }
+
+            // Check if the user is already added
+            if (usersData[user]) {
+                alert(`User "${user}" has already been added.`);
+                return;
+            }
+
+            // Create a new section for this user
+            const userSection = document.createElement('div');
+            userSection.className = 'chart-section';
+            userSection.innerHTML = `<h3>${user}</h3>
+                                     <div class="chart-container">
+                                        <div>
+                                            <h4>Kilometers Uploaded by Day</h4>
+                                            <canvas id="${user}-kmChart"></canvas>
+                                        </div>
+                                        <div>
+                                            <h4>Mount Reviews</h4>
+                                            <canvas id="${user}-mountReviewsChart"></canvas>
+                                        </div>
+                                     </div>`;
+            document.getElementById('users-section').appendChild(userSection);
+
+            // Fetch data for the new user
+            fetchData2(user);
+        });
+    }
+
+    async function fetchData2(userInput) {
+        const url = `https://cors-anywhere.herokuapp.com/https://www.hivemapper.com/api/explorer/user/${userInput}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const jsonData = await response.json();
+            usersData[userInput] = jsonData; // Store the fetched data
+
+            generateKmChart(userInput);
+            generateMountReviewsChart(userInput);
+        } catch (error) {
+            alert('Failed to fetch data for ' + userInput + ': ' + error.message);
+        }
+    }
+
+    function generateKmChart(userInput) {
+        const data = usersData[userInput];
+
+        if (!data.stats || !data.stats.kmUploadedByDay) {
+            alert(`No Km Uploaded data available for ${userInput}`);
+            return;
+        }
+
+        const labels = Object.keys(data.stats.kmUploadedByDay);
+        const values = Object.values(data.stats.kmUploadedByDay);
+
+        const ctx = document.getElementById(`${userInput}-kmChart`).getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Kilometers Uploaded by Day',
+                    data: values,
+                    backgroundColor: 'rgba(15, 31, 209, 0.8)',
+                    borderColor: 'rgba(1, 10, 105, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        ticks: {
+                            color: 'black', // Set x-axis ticks color to black
+                            font: {
+                                weight: 'bold' // Make x-axis ticks bold
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'black', // Set y-axis ticks color to black
+                            font: {
+                                weight: 'bold' // Make y-axis ticks bold
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'black', // Set legend text color to black
+                            font: {
+                                weight: 'bold' // Make legend text bold
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function generateMountReviewsChart(userInput) {
+        const data = usersData[userInput];
+
+        if (!data.stats || !data.stats.mountReviews) {
+            alert(`No Mount Reviews data available for ${userInput}`);
+            return;
+        }
+
+        const labels = Object.keys(data.stats.mountReviews);
+        const values = Object.values(data.stats.mountReviews);
+
+        const ctx = document.getElementById(`${userInput}-mountReviewsChart`).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Mount Reviews',
+                    data: values,
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    borderColor: 'mustard',
+                    pointBackgroundColor: '#b8860b',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        ticks: {
+                            color: 'black', // Set x-axis ticks color to black
+                            font: {
+                                weight: 'bold' // Make x-axis ticks bold
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'black', // Set y-axis ticks color to black
+                            font: {
+                                weight: 'bold' // Make y-axis ticks bold
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'black', // Set legend text color to black
+                            font: {
+                                weight: 'bold' // Make legend text bold
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+</div>
+
+<div id="other" style="display: none;">
+    <h3>Other Charts Section</h3>
+    <!-- Content for Other Charts -->
+</div>
+</body>
+</html>
