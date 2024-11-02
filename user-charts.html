@@ -8,24 +8,23 @@
     function showCharts(selected) {
         const userChartsSection = document.getElementById('user-charts');
         const fleetChartsSection = document.getElementById('fleet-charts');
-        const otherSection = document.getElementById('other');
+        const TransactionstabSection = document.getElementById('Transactionstab');
 
         if (selected === 'userCharts') {
             userChartsSection.style.display = 'block';
             fleetChartsSection.style.display = 'none';
-            otherSection.style.display = 'none';
+            TransactionstabSection.style.display = 'none';
         } else if (selected === 'fleetCharts') {
             userChartsSection.style.display = 'none';
             fleetChartsSection.style.display = 'block';
-            otherSection.style.display = 'none';
-        } else {
+            TransactionstabSection.style.display = 'none';
+        } else if (selected === 'Transactionstab') { // Show "Transactionstab" section when selected
             userChartsSection.style.display = 'none';
             fleetChartsSection.style.display = 'none';
-            otherSection.style.display = 'none';
+            TransactionstabSection.style.display = 'block';
         }
     }
 </script>
-
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -69,9 +68,10 @@
             height: auto;
             margin: 0 auto;
             font-family: Arial, sans-serif;
+            font-color: #ffffff;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            background-color: #8f909c;
+            background-color: #919191;
         }
         h2, h3 {
             text-align: center;
@@ -164,6 +164,99 @@
         .chart-button:hover {
             background-color: #0056b3; /* Darker blue on hover */
         }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #refreshButton {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #refreshButton:hover {
+            background-color: #0056b3;
+        }
+        #limitInput {
+            width: 60px;
+            padding: 5px;
+            margin-left: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #007BFF;
+        }
+        #loading {
+            text-align: center;
+            font-size: 18px;
+            color: #007BFF;
+        }
+        #errorMessage {
+            text-align: center;
+            font-size: 18px;
+            color: red;
+            display: none;
+        }
+        #rangeError {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #007BFF;
+            font-weight: bold;
+            font-size: 22px;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #9fa1ad;
+        }
+        tr:hover {
+            background-color: #cce7ff;
+        }
+        .filter-input {
+            width: 100%;
+            padding: 8px;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        hr {
+            border: none;            /* Remove default border */
+            height: 5px;            /* Thickness of the line */
+            background-color: black; /* Line color */
+            margin: 20px 0;         /* Optional: space around the line */
+        }
+           #user-input1 {
+            width: 250px;      /* Set the width */
+            height: 20px;      /* Set the height */
+            font-size: 20px;   /* Increase font size */
+            padding: 10px;     /* Add padding for better spacing */
+            border: 2px solid #575757; /* Optional: Set border color */
+            border-radius: 5px; /* Optional: Add rounded corners */
+        }
+         #user-input2 {
+            width: 500px;      /* Set the width */
+            height: 300px;      /* Set the height */
+            font-size: 20px;   /* Increase font size */
+            padding: 10px;     /* Add padding for better spacing */
+            border: 2px solid #575757; /* Optional: Set border color */
+            border-radius: 5px; /* Optional: Add rounded corners */
+        }
     </style>
 </head>
 <body>
@@ -178,16 +271,16 @@
         <h2>Select Fetch Type:</h2>
         <button class="chart-button" onclick="showCharts('userCharts')">Single User</button>
         <button class="chart-button" onclick="showCharts('fleetCharts')">Multiple Users (for Fleets)</button>
-        <button class="chart-button" onclick="showCharts('other')">Other (Wip)</button>
+        <button class="chart-button" onclick="showCharts('Transactionstab')">Transactions</button>
     </div>
-
+<hr>
 <!-- Sections for different chart types -->
 <div id="user-charts" style="display: none;">
     <!-- Existing user charts code goes here -->
 
 
 <h2>Fetch Data for Single User</h2>
-<label for="user-input1">Enter 3 words separated by hyphens (e.g., "great-white-shark"):</label>
+<B><font size=5><label for="user-input1">Enter 3 words separated by hyphens <br>(e.g., "great-white-shark"):</label></B></font>
 <input type="text" id="user-input1" placeholder="example: three-word-name" required pattern="^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z]+$">
 <button class="chart-button" onclick="fetchData1()">Go</button>
 
@@ -197,7 +290,7 @@
         <input type="checkbox" id="toggle-json" onclick="toggleJsonSection()">
         <span class="slider"></span>
     </label>
-    <label for="toggle-json">Show/Hide JSON Data</label>
+    <B><label for="toggle-json">Show/Hide JSON Data</label></B>
 </div>
 
 <!-- JSON Data section, hidden by default -->
@@ -486,7 +579,7 @@ generateLineCharttotalL12ByWeek(jsonData);
     }
  function generateLineCharttotalL12ByWeek(data) {
         const labels = Object.keys(data.stats.totalL12ByWeek || {});
-        const values = Object.values(data.stats.totalL12ByWeek || {});
+        const values = Object.values(data.stats.totalL12ByWeek || {}).map(value => value * 0.02172661);
 
         if (totalL12ByWeekLineChart) totalL12ByWeekLineChart.destroy();
 
@@ -497,7 +590,7 @@ generateLineCharttotalL12ByWeek(jsonData);
             data: {
                 labels,
                 datasets: [{
-                    label: 'Total per Week',
+                    label: 'Total Km per Week',
                     data: values,
                     backgroundColor: 'rgba(0, 123, 255, 0.1)',
                     borderColor: 'darkblue',
@@ -522,7 +615,7 @@ generateLineCharttotalL12ByWeek(jsonData);
                             beginAtZero: false,
                             title: {
                                 display: true,
-                                text: 'Km',
+                                text: 'Kilometers',
                                 color: '#000',
                                 font: {
                                     weight: 'bold',
@@ -566,7 +659,7 @@ generateLineCharttotalL12ByWeek(jsonData);
 <div id="fleet-charts" style="display: none;">
     
 <h2>Fetch Data for Multiple Users</h2>
-<label for="user-input2">Enter 3 words separated by hyphens (one per line, e.g., "great-white-shark"):</label>
+<B><font size=6><label for="user-input2">Enter 3 words separated by hyphens<br> (one per line, e.g., "great-white-shark"):</label></B></font>
 <textarea id="user-input2" placeholder="example: great-white-shark&#10;another-name-here"></textarea><br>
 <button class="chart-button" onclick="addUsers()">Add Users</button><br>
 <br>
@@ -751,9 +844,129 @@ generateLineCharttotalL12ByWeek(jsonData);
 </script>
 </div>
 
-<div id="other" style="display: none;">
-    <h3>Other Charts Section</h3>
-    <!-- Content for Other Charts -->
+<div id="Transactionstab" style="display: none;">
+    
+<h2>Transactions</h2>
+<div class="controls">
+    <label for="limitInput">Number of Transactions (1-10000):</label>
+    <input type="number" id="limitInput" value="100" min="1" max="10000">
+    <button class="chart-button" id="refreshButton">Refresh Data</button>
+    <div id="rangeError">Please enter a number between 1 and 10,000.</div>
+</div>
+<div id="loading" style="display: none;">Loading...</div>
+<div id="errorMessage">No data returned or an error occurred.</div>
+
+<table>
+    <thead>
+        <tr>
+            <th><input type="text" class="filter-input" placeholder="Filter Username" oninput="filterTable()" data-column="username"></th>
+            <th><input type="text" class="filter-input" placeholder="Filter Amount" oninput="filterTable()" data-column="amount"></th>
+            <th><input type="text" class="filter-input" placeholder="Filter Period" oninput="filterTable()" data-column="period"></th>
+            <th><input type="text" class="filter-input" placeholder="Filter Created At" oninput="filterTable()" data-column="createdAt"></th>
+            <th><input type="text" class="filter-input" placeholder="Filter Type" oninput="filterTable()" data-column="type"></th>
+            <th><input type="text" class="filter-input" placeholder="Filter Signature" oninput="filterTable()" data-column="signature"></th>
+        </tr>
+        <tr>
+            <th>Username</th>
+            <th>Amount</th>
+            <th>Period</th>
+            <th>Created At</th>
+            <th>Type</th>
+            <th>Signature</th>
+        </tr>
+    </thead>
+    <tbody id="transactionTable">
+        <!-- Data rows will be added here dynamically -->
+    </tbody>
+</table>
+
+<script>
+    const API_BASE_URL = "https://cors-anywhere.herokuapp.com/https://beemaps.com/api/transactions/rewards";
+
+    async function fetchTransactions() {
+        const loadingElement = document.getElementById("loading");
+        const errorElement = document.getElementById("errorMessage");
+        const rangeErrorElement = document.getElementById("rangeError");
+        const limitInput = document.getElementById("limitInput");
+        const limit = limitInput.value || 100;
+
+        // Validate limit value is within range
+        if (limit < 1 || limit > 10000) {
+            rangeErrorElement.style.display = "block";
+            return; // Stop the function if limit is out of range
+        } else {
+            rangeErrorElement.style.display = "none";
+        }
+
+        loadingElement.style.display = "block";
+        errorElement.style.display = "none";
+
+        try {
+            const response = await fetch(`${API_BASE_URL}?limit=${limit}&skip=0`);
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+
+            if (data.transactions && data.transactions.length > 0) {
+                displayTransactions(data.transactions);
+            } else {
+                errorElement.style.display = "block";
+                console.warn("No transactions data returned.");
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            errorElement.style.display = "block";
+        } finally {
+            loadingElement.style.display = "none";
+        }
+    }
+
+    function displayTransactions(transactions) {
+        const tableBody = document.getElementById("transactionTable");
+        tableBody.innerHTML = "";
+
+        transactions.forEach(transaction => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td data-column="username"><a href="https://beemaps.com/network/contributors/${transaction.username}" target="_blank">${transaction.username}</a></td>
+                <td data-column="amount">${transaction.amount}</td>
+                <td data-column="period">${new Date(transaction.period).toLocaleDateString()}</td>
+                <td data-column="createdAt">${new Date(transaction.createdAt).toLocaleString()}</td>
+                <td data-column="type">${transaction.type}</td>
+                <td data-column="signature"><a href="https://solscan.io/tx/${transaction.signature}" target="_blank">${transaction.signature}</a></td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function filterTable() {
+        const filterInputs = document.querySelectorAll(".filter-input");
+        const rows = document.querySelectorAll("#transactionTable tr");
+
+        rows.forEach(row => {
+            let isVisible = true;
+
+            filterInputs.forEach(input => {
+                const column = input.getAttribute("data-column");
+                const filterValue = input.value.toLowerCase();
+                const cellValue = row.querySelector(`[data-column="${column}"]`).textContent.toLowerCase();
+
+                if (filterValue && !cellValue.includes(filterValue)) {
+                    isVisible = false;
+                }
+            });
+
+            row.style.display = isVisible ? "" : "none";
+        });
+    }
+
+    document.getElementById("refreshButton").addEventListener("click", fetchTransactions);
+
+    fetchTransactions();
+</script>
+
 </div>
 </body>
 </html>
